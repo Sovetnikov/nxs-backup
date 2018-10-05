@@ -138,6 +138,7 @@ def get_conf_value(parsed_str):
     global smtp_server
     global smtp_port
     global smtp_ssl
+    global smtp_tls
     global smtp_user
     global smtp_password
     global smtp_timeout
@@ -208,6 +209,7 @@ def get_conf_value(parsed_str):
 
     smtp_port = parsed_str['main'].get('smtp_port',None)
     smtp_ssl = parsed_str['main'].get('smtp_ssl',None)
+    smtp_tls = parsed_str['main'].get('smtp_tls',None)
     smtp_server = parsed_str['main'].get('smtp_server',None)
     smtp_user = parsed_str['main'].get('smtp_user',None)
     smtp_password = parsed_str['main'].get('smtp_password',None)

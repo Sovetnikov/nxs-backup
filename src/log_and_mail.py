@@ -58,7 +58,9 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
             if config.smtp_ssl:
                 smtp = smtplib.SMTP_SSL(config.smtp_server, port=config.smtp_port if config.smtp_port else 465, timeout=config.smtp_timeout)
             else:
-                smtp = smtplib.SMTP(config.smtp_server, port=config.smtp_port if config.smtp_port else 25, timeout=config.smtp_timeout)
+                smtp = smtplib.SMTP(config.smtp_server, port=config.smtp_port if config.smtp_port else 25)
+            if config.smtp_tls:
+                smtp.starttls()
             if config.smtp_user and config.smtp_password:
                 smtp.login(config.smtp_user, config.smtp_password)
 
