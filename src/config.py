@@ -140,6 +140,7 @@ def get_conf_value(parsed_str):
     global smtp_ssl
     global smtp_user
     global smtp_password
+    global smtp_timeout
 
     general_str_for_backup_type_db = ', '.join(supported_db_backup_type)
     general_str_for_backup_type_files = ', '.join(supported_file_backup_type)
