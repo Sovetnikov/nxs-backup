@@ -210,5 +210,6 @@ def get_conf_value(parsed_str):
     smtp_server = parsed_str['main'].get('smtp_server',None)
     smtp_user = parsed_str['main'].get('smtp_user',None)
     smtp_password = parsed_str['main'].get('smtp_password',None)
+    smtp_timeout = parsed_str['main'].get('smtp_timeout',None)
 
     return (db_job_dict, file_job_dict, external_job_dict)
