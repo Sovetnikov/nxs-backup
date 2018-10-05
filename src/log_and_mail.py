@@ -51,7 +51,7 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
 
     if config.smtp_server:
         msg = MIMEMultipart()
-        msg['From'] = sender
+        msg['From'] = config.smtp_user if config.smtp_user and '@' in config.smtp_user else sender
         msg['To'] = ','.join(itog_mail_addr)
         msg['Subject'] = '%s notification dump.' % (server_name)
         msg.attach(MIMEText(body))
