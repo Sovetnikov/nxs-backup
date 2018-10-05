@@ -141,6 +141,7 @@ def get_conf_value(parsed_str):
     global smtp_user
     global smtp_password
     global smtp_tls
+    global smtp_timeout
 
     general_str_for_backup_type_db = ', '.join(supported_db_backup_type)
     general_str_for_backup_type_files = ', '.join(supported_file_backup_type)
@@ -212,5 +213,6 @@ def get_conf_value(parsed_str):
     smtp_user = parsed_str['main'].get('smtp_user',None)
     smtp_password = parsed_str['main'].get('smtp_password',None)
     smtp_tls = parsed_str['main'].get('smtp_tls',None)
+    smtp_timeout = parsed_str['main'].get('smtp_timeout', None)
 
     return (db_job_dict, file_job_dict, external_job_dict)
