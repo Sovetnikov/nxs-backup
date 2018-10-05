@@ -65,7 +65,7 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
             smtp.sendmail(msg['From'], msg['To'], body)
             smtp.close()
         except Exception as e:
-            writelog('ERROR', "Some problem when sending a message via /usr/bin/sendmail: %s" %e,
+            writelog('ERROR', "Some problem when sending a message via %s: %s" %(config.smtp_server,e),
                      config.filelog_fd)
     else:
         try:
