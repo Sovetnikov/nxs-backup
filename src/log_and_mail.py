@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import smtplib
 import subprocess
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import config
@@ -48,12 +49,15 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
         if q:
             itog_mail_addr.append(q)
 
-    msg = MIMEText(body, "", "utf-8")
-    msg['Subject'] = '%s notification dump.' %(server_name)
-    msg['From'] = sender
-    msg['To'] = ','.join(itog_mail_addr)
-
     if config.smtp_server:
+        msg = MIMEMultipart()
+        msg['From'] = sender
+        msg['To'] = ','.join(itog_mail_addr)
+        msg['Subject'] = '%s notification dump.' % (server_name)
+        msg.attach(MIMEText(body))
+
+        body = "YOUR MESSAGE HERE"
+        msg.attach(MIMEText(body, 'plain'))
         try:
             if config.smtp_ssl:
                 smtp = smtplib.SMTP_SSL(config.smtp_server, port=config.smtp_port if config.smtp_port else 465, timeout=config.smtp_timeout)
@@ -70,6 +74,10 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
             writelog('ERROR', "Some problem when sending a message via %s: %s" %(config.smtp_server, e),
                      config.filelog_fd)
     else:
+        msg = MIMEText(body, "", "utf-8")
+        msg['Subject'] = '%s notification dump.' % (server_name)
+        msg['From'] = sender
+        msg['To'] = ','.join(itog_mail_addr)
         try:
             p = subprocess.Popen(["/usr/sbin/sendmail -t -oi"], stdin=subprocess.PIPE, shell=True)
             p.communicate(msg.as_bytes())
