@@ -2,6 +2,8 @@
 /.project
 /.pydevproject
 /.settings
+/.idea
+/.cache
 /tmp
 /objs
 _CPack_Packages

@@ -135,6 +135,11 @@ def get_conf_value(parsed_str):
     global cpu_shares
     global supported_general_job
 
+    global smtp_server
+    global smtp_port
+    global smtp_ssl
+    global smtp_user
+    global smtp_password
 
     general_str_for_backup_type_db = ', '.join(supported_db_backup_type)
     general_str_for_backup_type_files = ', '.join(supported_file_backup_type)
@@ -172,13 +177,13 @@ def get_conf_value(parsed_str):
         else:
             general_function.print_info("Backup type '%s' in job '%s' does not supported, so this job was ignored! Only one of this type backup is allowed:%s!" %(backup_type, job_name, supported_backup_type))
 
-    all_jobs_name = (list(db_job_dict.keys()) + list(file_job_dict.keys()) + 
+    all_jobs_name = (list(db_job_dict.keys()) + list(file_job_dict.keys()) +
                         list(external_job_dict.keys()) + supported_general_job)
 
     general_str = ', '.join(all_jobs_name)
     regular_str = ''.join(['^'+item+'$|' for item in all_jobs_name])[0:-1]
 
-    log_file = parsed_str['main']['log_file']
+    log_file = parsed_str['main'].get('log_file', None)
     if not log_file:
         log_file = '/var/log/nxs-backup/nxs-backup.log'
 
@@ -199,5 +204,11 @@ def get_conf_value(parsed_str):
     blkio_weight = parsed_str['main']['blkio_weight']
     general_path_to_all_tmp_dir = parsed_str['main']['general_path_to_all_tmp_dir']
     cpu_shares = parsed_str['main']['cpu_shares']
+
+    smtp_port = parsed_str['main'].get('smtp_port',None)
+    smtp_ssl = parsed_str['main'].get('smtp_ssl',None)
+    smtp_server = parsed_str['main'].get('smtp_server',None)
+    smtp_user = parsed_str['main'].get('smtp_user',None)
+    smtp_password = parsed_str['main'].get('smtp_password',None)
 
     return (db_job_dict, file_job_dict, external_job_dict)

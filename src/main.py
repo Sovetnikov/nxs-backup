@@ -1,8 +1,40 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
 import argparse
+import inspect
+import os
+import sys
+
+
+# Add script directory to sys.path for make implicit relative imports work with setuptools installation.
+# This is complicated due to the fact that __file__ is not always defined.
+
+def GetScriptDirectory():
+    if hasattr(GetScriptDirectory, "dir"):
+        return GetScriptDirectory.dir
+    module_path = ""
+    try:
+        # The easy way. Just use __file__.
+        # Unfortunately, __file__ is not available when cx_freeze is used or in IDLE.
+        module_path = __file__
+    except NameError:
+        if len(sys.argv) > 0 and len(sys.argv[0]) > 0 and os.path.isabs(sys.argv[0]):
+            module_path = sys.argv[0]
+        else:
+            module_path = os.path.abspath(inspect.getfile(GetScriptDirectory))
+            if not os.path.exists(module_path):
+                # If cx_freeze is used the value of the module_path variable at this point is in the following format.
+                # {PathToExeFile}\{NameOfPythonSourceFile}. This makes it necessary to strip off the file name to get the correct
+                # path.
+                module_path = os.path.dirname(module_path)
+    GetScriptDirectory.dir = os.path.dirname(module_path)
+    return GetScriptDirectory.dir
+
+
+script_dir = GetScriptDirectory()
+if not script_dir in sys.path:
+    sys.path.append(GetScriptDirectory())
 
 import config
 import general_function
@@ -20,25 +52,23 @@ import inc_files_backup
 import external_backup
 import generate_config
 
-
 try:
     import version
 except ImportError as err:
-    general_function.print_info("Can't get version from file version.py: %s" %(err))
+    general_function.print_info("Can't get version from file version.py: %s" % (err))
     VERSION = 'unknown'
 else:
     VERSION = ''
 
 
 def do_backup(path_to_config, jobs_name):
-
     resource_constraint.set_limitations()
 
     try:
         parsed_string = specific_function.get_parsed_string(path_to_config)
     except general_function.MyError as e:
         general_function.print_info("An error in the parse of the configuration file %s:%s!"
-                                    %(path_to_config, e))
+                                    % (path_to_config, e))
         sys.exit(1)
 
     (db_jobs_dict, file_jobs_dict, external_jobs_dict) = config.get_conf_value(parsed_string)
@@ -46,7 +76,7 @@ def do_backup(path_to_config, jobs_name):
     general_function.create_files('', config.log_file)
 
     if not jobs_name in config.all_jobs_name:
-        general_function.print_info("Only one of this job's name is allowed: %s" %(config.general_str))
+        general_function.print_info("Only one of this job's name is allowed: %s" % (config.general_str))
         sys.exit(1)
 
     try:
@@ -55,12 +85,12 @@ def do_backup(path_to_config, jobs_name):
         try:
             config.filelog_fd = open(config.log_file, 'w')
         except (OSError, PermissionError, FileNotFoundError) as e:
-            messange_info = "Couldn't open file %s:%s!" %(config.log_file, e)
+            messange_info = "Couldn't open file %s:%s!" % (config.log_file, e)
             general_function.print_info(messange_info)
             log_and_mail.send_report(messange_info)
             sys.exit(1)
     except (PermissionError, FileNotFoundError) as e:
-        messange_info = "Couldn't open file %s:%s!" %(config.log_file, e)
+        messange_info = "Couldn't open file %s:%s!" % (config.log_file, e)
         general_function.print_info(messange_info)
         log_and_mail.send_report(messange_info)
         sys.exit(1)
@@ -79,7 +109,6 @@ def do_backup(path_to_config, jobs_name):
             current_jobs_name = file_jobs_dict[i]['job']
             execute_job(current_jobs_name, file_jobs_dict[i])
         log_and_mail.writelog('INFO', "Finishing files block backup.", config.filelog_fd)
-
 
         log_and_mail.writelog('INFO', "Starting databases block backup.", config.filelog_fd)
         for i in list(db_jobs_dict.keys()):
@@ -135,12 +164,12 @@ def execute_job(jobs_name, jobs_data):
 
     '''
 
-    log_and_mail.writelog('INFO', "Starting backup for job '%s'." %jobs_name, config.filelog_fd, jobs_name)
+    log_and_mail.writelog('INFO', "Starting backup for job '%s'." % jobs_name, config.filelog_fd, jobs_name)
 
     if not specific_function.validation_storage_data(jobs_data):
         return 1
 
-    backup_type = jobs_data['type'] 
+    backup_type = jobs_data['type']
 
     if backup_type == 'mysql':
         mysql_backup.mysql_backup(jobs_data)
@@ -169,7 +198,7 @@ def execute_job(jobs_name, jobs_data):
     else:
         external_backup.external_backup(jobs_data)
 
-    log_and_mail.writelog('INFO', "Finishing backup for job '%s'." %jobs_name, config.filelog_fd, jobs_name)
+    log_and_mail.writelog('INFO', "Finishing backup for job '%s'." % jobs_name, config.filelog_fd, jobs_name)
 
     return 0
 
@@ -179,9 +208,9 @@ def test_config(path_to_config):
         specific_function.get_parsed_string(path_to_config)
     except general_function.MyError as e:
         general_function.print_info("The configuration file '%s' syntax is bad: %s! "
-                                    %(path_to_config, e))
+                                    % (path_to_config, e))
     else:
-        general_function.print_info("The configuration file '%s' syntax is ok!" %(path_to_config))
+        general_function.print_info("The configuration file '%s' syntax is ok!" % (path_to_config))
     finally:
         sys.exit()
 
@@ -192,7 +221,7 @@ def get_parser():
         try:
             VERSION = version.VERSION
         except AttributeError as err:
-            general_function.print_info('Can\'t get version from file version.py: %s' %(err))
+            general_function.print_info('Can\'t get version from file version.py: %s' % (err))
             VERSION = 'unknown'
 
     # Parent parsers
@@ -200,9 +229,9 @@ def get_parser():
     version_parser.add_argument('-v', '--version', action='version', version=VERSION)
 
     config_parser = argparse.ArgumentParser(add_help=False)
-    config_parser.add_argument('-c', '--config',  dest='path_to_config', type=str,
-                              action='store', help='path to config',
-                              default=r'/etc/nxs-backup/nxs-backup.conf')
+    config_parser.add_argument('-c', '--config', dest='path_to_config', type=str,
+                               action='store', help='path to config',
+                               default=r'/etc/nxs-backup/nxs-backup.conf')
 
     # Main parser
     command_parser = argparse.ArgumentParser(parents=[config_parser, version_parser],
@@ -210,7 +239,7 @@ def get_parser():
                                              usage='%(prog)s [arguments]')
     # Optional argument
     command_parser.add_argument('-t', '--test', dest='test_conf', action='store_true',
-                                help="Check the syntax of the configuration file.", 
+                                help="Check the syntax of the configuration file.",
                                 )
 
     # Positional argument
@@ -224,7 +253,7 @@ def get_parser():
     # Generate command
     generate_parser = subparsers.add_parser('generate', help='Generate backup\'s config file.')
     generate_parser.add_argument('-T', '--type', dest='backup_type', type=str, help='One of the type backup.',
-                                  nargs=1, choices=config.supported_backup_type, required=True)
+                                 nargs=1, choices=config.supported_backup_type, required=True)
     generate_parser.add_argument('-S', '--storages', dest='storages', type=str, help='One or more storages.',
                                  nargs='+', choices=config.supported_storages, required=True)
     generate_parser.add_argument('-P', '--path', dest='path_to_generate_file', type=str,
@@ -234,7 +263,6 @@ def get_parser():
 
 
 def main():
-
     parser = get_parser()
     args = parser.parse_args()
 

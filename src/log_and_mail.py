@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import smtplib
 import subprocess
 from email.mime.text import MIMEText
 
@@ -53,12 +53,27 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
     msg['From'] = sender
     msg['To'] = ','.join(itog_mail_addr)
 
-    try:
-        p = subprocess.Popen(["/usr/sbin/sendmail -t -oi"], stdin=subprocess.PIPE, shell=True)
-        p.communicate(msg.as_bytes())
-    except Exception as e:
-        writelog('ERROR', "Some problem when sending a message via /usr/bin/sendmail: %s" %e,
-                 config.filelog_fd)
+    if config.smtp_server:
+        try:
+            if config.smtp_ssl:
+                smtp = smtplib.SMTP_SSL(config.smtp_server, port=config.smtp_port if config.smtp_port else 465)
+            else:
+                smtp = smtplib.SMTP(config.smtp_server, port=config.smtp_port if config.smtp_port else 25)
+            if config.smtp_user and config.smtp_password:
+                smtp.login(config.smtp_user, config.smtp_password)
+
+            smtp.sendmail(msg['From'], msg['To'], body)
+            smtp.close()
+        except Exception as e:
+            writelog('ERROR', "Some problem when sending a message via /usr/bin/sendmail: %s" %e,
+                     config.filelog_fd)
+    else:
+        try:
+            p = subprocess.Popen(["/usr/sbin/sendmail -t -oi"], stdin=subprocess.PIPE, shell=True)
+            p.communicate(msg.as_bytes())
+        except Exception as e:
+            writelog('ERROR', "Some problem when sending a message via /usr/bin/sendmail: %s" %e,
+                     config.filelog_fd)
 
 
 def get_log(log_level, log_message, type_message=''):
