@@ -49,7 +49,7 @@ def desc_files_backup(job_data):
             target_ofs_list = general_files_func.get_ofs(regex)
 
             if not target_ofs_list:
-                log_and_mail.writelog('ERROR', "No file system objects found that" +\
+                log_and_mail.writelog('ERROR', "No file system objects found that " +\
                                       "match the regular expression '%s'!" %(regex), 
                                       config.filelog_fd, job_name)
                 continue
