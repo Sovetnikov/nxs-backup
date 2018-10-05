@@ -80,10 +80,10 @@ def do_backup(path_to_config, jobs_name):
         sys.exit(1)
 
     try:
-        config.filelog_fd = open(config.log_file, 'a')
+        config.filelog_fd = open(config.log_file, 'a', 0) # no buffering
     except OSError:  # e.g. /dev/stdout
         try:
-            config.filelog_fd = open(config.log_file, 'w')
+            config.filelog_fd = open(config.log_file, 'w', 0) # no buffering
         except (OSError, PermissionError, FileNotFoundError) as e:
             messange_info = "Couldn't open file %s:%s!" % (config.log_file, e)
             general_function.print_info(messange_info)
