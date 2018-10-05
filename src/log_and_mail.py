@@ -55,9 +55,6 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
         msg['To'] = ','.join(itog_mail_addr)
         msg['Subject'] = '%s notification dump.' % (server_name)
         msg.attach(MIMEText(body))
-
-        body = "YOUR MESSAGE HERE"
-        msg.attach(MIMEText(body, 'plain'))
         try:
             if config.smtp_ssl:
                 smtp = smtplib.SMTP_SSL(config.smtp_server, port=config.smtp_port if config.smtp_port else 465, timeout=config.smtp_timeout)
