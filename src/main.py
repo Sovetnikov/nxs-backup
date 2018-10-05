@@ -277,7 +277,7 @@ def main():
             parser.print_help()
     finally:
         if config.filelog_fd:
-            os.close(config.filelog_fd)
+            config.filelog_fd.close()
 
 
 if __name__ == '__main__':
