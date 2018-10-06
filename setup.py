@@ -8,11 +8,9 @@ setup(name='nxs-backup',
       author_email='',
       packages=['nxsbackup', ],
       package_dir={'nxsbackup': 'src'},
-      # scripts=['nxs-backup.py'],
       entry_points={
           'console_scripts': [
               'nxs-backup=nxsbackup.main:main',
-              # 'funniest-joke=funniest.command_line:main',
           ],
       },
       install_requires=[
