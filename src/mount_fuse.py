@@ -343,9 +343,9 @@ def check_s3fs_secrets(str_auth):
             conf = f.read()
             if conf.find(str_auth) == -1:
                 f.write(str_auth)
-
     except (FileNotFoundError, IOError) as e:
         raise MountError("Can't write authentication information for 's3fs' resource: %s" % (e))
+    os.chmod(conf_path, 0o600)
 
     return 1
 
