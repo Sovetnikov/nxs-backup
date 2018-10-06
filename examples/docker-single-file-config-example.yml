@@ -1,0 +1,51 @@
+main:
+  server_name: SERVER_NAME
+
+  admin_mail: admin@domain.com
+  client_mail:
+  - ''
+  mail_from: admin@domain.com
+  level_message: error
+
+  block_io_read: ''
+  block_io_write: ''
+  blkio_weight: ''
+  general_path_to_all_tmp_dir: /var/nxs-backup
+
+  cpu_shares: ''
+
+  log_file: /dev/stdout
+
+  smtp_server: SMTP_SERVER
+  smtp_port: 465
+  smtp_ssl: yes
+  smtp_user: SMTP_USER
+  smtp_password: SMTP_PASSWORD
+  smtp_timeout: 60
+jobs:
+  - job: SERVER_NAME-desc-files
+    type: desc_files
+    tmp_dir: /var/nxs-backup/files/desc/dump_tmp
+
+    sources:
+    - target:
+      - /app/data/*
+      excludes:
+      - CACHE
+      gzip: yes
+
+    storages:
+    - storage: s3
+      enable: yes
+
+      backup_dir: /nxs-backup/files/desc/dump
+
+      bucket_name: 'bucket'
+      access_key_id: 'access_key_id'
+      secret_access_key: 'secret_access_key'
+      s3fs_opts: '-o url=https://<custom_endpoint_url> -o use_path_request_style'
+
+      store:
+        days: 1
+        weeks: 1
+        month: 6

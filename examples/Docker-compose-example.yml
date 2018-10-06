@@ -1,0 +1,12 @@
+version: '2'
+services:
+  nxs:
+    image: nixyslab/nxs-backup
+    volumes:
+      - /home/user/nxs-backup-config.yml:/etc/nxs-backup/nxs-backup.conf
+    devices:
+      - /dev/fuse:/dev/fuse
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
