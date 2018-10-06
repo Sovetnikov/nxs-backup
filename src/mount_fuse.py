@@ -7,6 +7,7 @@ import re
 import general_function
 
 mount_point = ''
+s3fs_passwd_file_path = None
 
 class MountError(Exception):
     def __init__(self, message):
@@ -203,8 +204,16 @@ def get_mount_data(current_storage_data):
         if s3fs_opts:
             mount_cmd = '{mount_cmd} {s3fs_opts}'.format(**locals())
         if s3fs_access_key_id and s3fs_secret_access_key:
-            pre_mount['check_s3fs_secrets'] = '{bucket_name}:{s3fs_access_key_id}:{s3fs_secret_access_key}'.format(**locals())
-
+            from tempfile import NamedTemporaryFile
+            with NamedTemporaryFile(mode='w', delete=False) as f:
+                f.write(s3fs_access_key_id + ':' + s3fs_secret_access_key)
+                f.close()
+                s3fs_passwd_file_path = f.name
+        if s3fs_passwd_file_path:
+            mount_cmd = '{mount_cmd} -o passwd_file={s3fs_passwd_file_path}'.format(s3fs_passwd_file_path=s3fs_passwd_file_path, **locals())
+        import log_and_mail
+        import config
+        log_and_mail.writelog('INFO', 's3fs mount cmd: "{mount_cmd}"'.format(**locals()), config.filelog_fd)
     else:
         mount_point = ''
         return [dict_mount_data, pre_mount]
@@ -315,6 +324,9 @@ def unmount():
             raise general_function.MyError("Bad result code external process '%s':'%s'" % (umount_cmd, code))
         else:
             general_function.del_file_objects('', mount_point)
+    if s3fs_passwd_file_path:
+        os.remove(s3fs_passwd_file_path)
+        s3fs_passwd_file_path = None
     return 1
 
 
@@ -334,18 +346,3 @@ def check_secrets(str_auth):
         raise MountError("Can't write authentication information for 'webdav' resource: %s" % (e))
 
     return 1
-
-def check_s3fs_secrets(str_auth):
-    conf_path = '/etc/passwd-s3fs'
-
-    try:
-        with open(conf_path, 'a+') as f:
-            conf = f.read()
-            if conf.find(str_auth) == -1:
-                f.write(str_auth)
-    except (FileNotFoundError, IOError) as e:
-        raise MountError("Can't write authentication information for 's3fs' resource: %s" % (e))
-    os.chmod(conf_path, 0o600)
-
-    return 1
-
