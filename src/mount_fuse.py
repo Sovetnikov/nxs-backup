@@ -204,13 +204,14 @@ def get_mount_data(current_storage_data):
         if s3fs_opts:
             mount_cmd = '{mount_cmd} {s3fs_opts}'.format(**locals())
         if s3fs_access_key_id and s3fs_secret_access_key:
-            from tempfile import NamedTemporaryFile
-            with NamedTemporaryFile(mode='w', delete=False) as f:
-                f.write(bucket_name + ':' + s3fs_access_key_id + ':' + s3fs_secret_access_key)
-                f.close()
-                s3fs_passwd_file_path = f.name
-        if s3fs_passwd_file_path:
-            mount_cmd = '{mount_cmd} -o passwd_file={s3fs_passwd_file_path}'.format(s3fs_passwd_file_path=s3fs_passwd_file_path, **locals())
+            pre_mount['check_s3fs_secrets'] = '{bucket_name}:{s3fs_access_key_id}:{s3fs_secret_access_key}'.format(**locals())
+        #     from tempfile import NamedTemporaryFile
+        #     with NamedTemporaryFile(mode='w', delete=False) as f:
+        #         f.write(bucket_name + ':' + s3fs_access_key_id + ':' + s3fs_secret_access_key)
+        #         f.close()
+        #         s3fs_passwd_file_path = f.name
+        # if s3fs_passwd_file_path:
+        #     mount_cmd = '{mount_cmd} -o passwd_file={s3fs_passwd_file_path}'.format(s3fs_passwd_file_path=s3fs_passwd_file_path, **locals())
         import log_and_mail
         import config
         log_and_mail.writelog('INFO', 's3fs mount cmd: "{mount_cmd}"'.format(**locals()), config.filelog_fd)
@@ -346,3 +347,18 @@ def check_secrets(str_auth):
         raise MountError("Can't write authentication information for 'webdav' resource: %s" % (e))
 
     return 1
+
+def check_s3fs_secrets(str_auth):
+    conf_path = '/etc/passwd-s3fs'
+
+    try:
+        with open(conf_path, 'r+') as f:
+            conf = f.read()
+            if conf.find(str_auth) == -1:
+                f.write(str_auth)
+    except (FileNotFoundError, IOError) as e:
+        raise MountError("Can't write authentication information for 's3fs' resource: %s" % (e))
+    os.chmod(conf_path, 0o600)
+
+    return 1
+
