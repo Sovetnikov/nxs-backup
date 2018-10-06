@@ -7,7 +7,7 @@ import re
 import general_function
 
 mount_point = ''
-
+s3fs_passwd_file_path = None
 
 class MountError(Exception):
     def __init__(self, message):
@@ -90,6 +90,9 @@ def get_storage_data(job_name, storage_data):
             err_message = "Field 'bucketname' in job '%s' for storage '%s' can't be empty!" % (job_name, storage)
         else:
             data_dict['bucket_name'] = bucketname
+        data_dict['s3fs_opts'] = storage_data.get('s3fs_opts', '')
+        data_dict['access_key_id'] = storage_data.get('access_key_id', '')
+        data_dict['secret_access_key'] = storage_data.get('secret_access_key', '')
 
     if err_message:
         raise general_function.MyError(err_message)
@@ -115,6 +118,7 @@ def get_mount_data(current_storage_data):
     '''
 
     global mount_point
+    global s3fs_passwd_file_path
     dist = general_function.get_dist()
     pre_install_cmd = ''
     pre_mount = {}
@@ -147,7 +151,6 @@ def get_mount_data(current_storage_data):
     s3fs_opts = current_storage_data.get('s3fs_opts', '')
     s3fs_access_key_id = current_storage_data.get('access_key_id', '')
     s3fs_secret_access_key = current_storage_data.get('secret_access_key', '')
-    s3fs_passwd_file_path = None
 
     if storage == 'scp':
         packets = ['openssh-client', 'sshfs', 'sshpass']
@@ -320,7 +323,9 @@ def unmount():
             raise general_function.MyError("Bad result code external process '%s':'%s'" % (umount_cmd, code))
         else:
             general_function.del_file_objects('', mount_point)
-
+    if s3fs_passwd_file_path:
+        os.remove(s3fs_passwd_file_path)
+        s3fs_passwd_file_path = None
     return 1
 
 
