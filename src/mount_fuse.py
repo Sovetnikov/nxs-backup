@@ -206,7 +206,7 @@ def get_mount_data(current_storage_data):
         if s3fs_access_key_id and s3fs_secret_access_key:
             from tempfile import NamedTemporaryFile
             with NamedTemporaryFile(mode='w', delete=False) as f:
-                f.write(s3fs_access_key_id + ':' + s3fs_secret_access_key)
+                f.write(bucket_name + ':' + s3fs_access_key_id + ':' + s3fs_secret_access_key)
                 f.close()
                 s3fs_passwd_file_path = f.name
         if s3fs_passwd_file_path:
