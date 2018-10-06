@@ -10,6 +10,7 @@ import general_function
 
 mount_point = ''
 
+
 class MountError(Exception):
     def __init__(self, message):
         self.message = message
@@ -205,7 +206,6 @@ def get_mount_data(current_storage_data):
             mount_cmd = '{mount_cmd} {s3fs_opts}'.format(**locals())
         if s3fs_access_key_id and s3fs_secret_access_key:
             pre_mount['check_s3fs_secrets'] = '{bucket_name}:{s3fs_access_key_id}:{s3fs_secret_access_key}'.format(**locals())
-
     else:
         mount_point = ''
         return [dict_mount_data, pre_mount]
@@ -315,7 +315,6 @@ def unmount():
             raise general_function.MyError("Bad result code external process '%s':'%s'" % (umount_cmd, code))
         else:
             general_function.del_file_objects('', mount_point)
-    return 1
 
 
 def check_secrets(str_auth):
@@ -335,11 +334,15 @@ def check_secrets(str_auth):
 
     return 1
 
+
 def check_s3fs_secrets(str_auth):
     conf_path = '/etc/passwd-s3fs'
 
+    if not os.path.isfile(conf_path):
+        with open(conf_path, 'w') as f:
+            pass
     try:
-        with open(conf_path, 'a+') as f:
+        with open(conf_path, 'r+') as f:
             conf = f.read()
             if conf.find(str_auth) == -1:
                 f.write(str_auth)
@@ -349,5 +352,4 @@ def check_s3fs_secrets(str_auth):
         os.chmod(conf_path, 0o600)
     except OSError:
         pass
-
     return 1
