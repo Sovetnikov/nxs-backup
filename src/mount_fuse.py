@@ -311,6 +311,7 @@ def mount(current_storage_data):
 
 
 def unmount():
+    global s3fs_passwd_file_path
     if mount_point:
         umount_cmd = "fusermount -uz %s" % (mount_point)
         umount = general_function.exec_cmd(umount_cmd)
