@@ -210,7 +210,7 @@ def get_mount_data(current_storage_data):
                 f.close()
                 s3fs_passwd_file_path = f.name
         if s3fs_passwd_file_path:
-            mount_cmd = '{mount_cmd} -o passwd_file={s3fs_passwd_file_path}'.format(**locals())
+            mount_cmd = '{mount_cmd} -o passwd_file={s3fs_passwd_file_path}'.format(s3fs_passwd_file_path=s3fs_passwd_file_path, **locals())
         import log_and_mail
         import config
         log_and_mail.writelog('INFO', 's3fs mount cmd: "{mount_cmd}"'.format(**locals()), config.filelog_fd)
