@@ -351,6 +351,9 @@ def check_secrets(str_auth):
 def check_s3fs_secrets(str_auth):
     conf_path = '/etc/passwd-s3fs'
 
+    if not os.path.isfile(conf_path):
+        with open(conf_path, 'w') as f:
+            pass
     try:
         with open(conf_path, 'r+') as f:
             conf = f.read()
@@ -358,7 +361,9 @@ def check_s3fs_secrets(str_auth):
                 f.write(str_auth)
     except (FileNotFoundError, IOError) as e:
         raise MountError("Can't write authentication information for 's3fs' resource: %s" % (e))
-    os.chmod(conf_path, 0o600)
-
+    try:
+        os.chmod(conf_path, 0o600)
+    except OSError:
+        pass
     return 1
 
