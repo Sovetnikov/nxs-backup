@@ -208,6 +208,8 @@ def get_mount_data(current_storage_data):
                 s3fs_passwd_file_path = f.name
         if s3fs_passwd_file_path:
             mount_cmd = '{mount_cmd} -o passwd_file={s3fs_passwd_file_path}'.format(**locals())
+        import log_and_mail
+        log_and_mail.writelog('INFO', 's3fs mount cmd: "{mount_cmd}"'.format(**locals()))
     else:
         mount_point = ''
         return [dict_mount_data, pre_mount]
