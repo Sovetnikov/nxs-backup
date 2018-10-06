@@ -145,6 +145,7 @@ def get_mount_data(current_storage_data):
     share = current_storage_data.get('share', '')
     path_to_key = current_storage_data.get('path_to_key', '')
     bucket_name = current_storage_data.get('bucket_name', '')
+    s3fs_opts = current_storage_data.get('s3fs_opts', '')
 
     if storage == 'scp':
         packets = ['openssh-client', 'sshfs', 'sshpass']
@@ -195,6 +196,8 @@ def get_mount_data(current_storage_data):
         packets = ['']
         mount_point = '/mnt/s3'
         mount_cmd = 's3fs %s %s -o multipart_size=50' %(bucket_name, mount_point)
+        if s3fs_opts:
+            mount_cmd = mount_cmd + ' ' + s3fs_opts
     else:
         mount_point = ''
         return [dict_mount_data, pre_mount]
