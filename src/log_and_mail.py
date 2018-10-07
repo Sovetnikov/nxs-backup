@@ -26,7 +26,7 @@ def send_report(*message):
     if config.send_success_reports:
         success_jobs = config.all_executed_jobs - set(config.jobs_error_log.keys())
         if success_jobs:
-            success_body = 'Success run for:\n' + '\n'.join('- ' + x for x in sorted(success_jobs))
+            success_body = '\nSuccess run for jobs:\n' + '\n'.join('- ' + x for x in sorted(success_jobs))
             if not config.error_log:
                 success_subject_postfix = 'success'
 
