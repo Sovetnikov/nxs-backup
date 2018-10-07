@@ -315,7 +315,7 @@ def unmount():
             raise general_function.MyError("Bad result code external process '%s':'%s'" % (umount_cmd, code))
         else:
             general_function.del_file_objects('', mount_point)
-
+    return 1
 
 def check_secrets(str_auth):
     conf_path = '/etc/davfs2/secrets'
