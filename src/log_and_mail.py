@@ -83,7 +83,7 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body, subj
             if config.smtp_user and config.smtp_password:
                 smtp.login(config.smtp_user, config.smtp_password)
 
-            smtp.sendmail(msg['From'], msg['To'], msg.as_string())
+            smtp.sendmail(msg['From'], itog_mail_addr, msg.as_string())
             smtp.close()
         except Exception as e:
             writelog('ERROR', "Some problem when sending a message via %s: %s" % (config.smtp_server, e),
