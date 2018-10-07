@@ -27,12 +27,12 @@ supported_external_backup_type = [
 
 
 supported_storages = [
-                    'local', 
-                    'scp', 
-                    'ftp', 
-                    'webdav', 
-                    'smb', 
-                    'nfs', 
+                    'local',
+                    'scp',
+                    'ftp',
+                    'webdav',
+                    'smb',
+                    'nfs',
                     's3'
     ]
 
@@ -69,7 +69,7 @@ debug_log = ''
 all_jobs_name = []
 all_executed_jobs = set()
 
-regular_str = ''  # The regular string that compares the argument to the program input (job's name).  
+regular_str = ''  # The regular string that compares the argument to the program input (job's name).
 general_str = ''  # String to display the available values for jobs names in help menu.
 
 regular_str_for_backup_type = ''
@@ -87,7 +87,7 @@ log_file = ''
 admin_mail = ''
 client_mail = []
 send_success_reports = None
-level_message = '' 
+level_message = ''
 mail_from = ''
 
 server_name = ''
@@ -219,6 +219,6 @@ def get_conf_value(parsed_str):
     smtp_server = parsed_str['main'].get('smtp_server',None)
     smtp_user = parsed_str['main'].get('smtp_user',None)
     smtp_password = parsed_str['main'].get('smtp_password',None)
-    smtp_timeout = parsed_str['main'].get('smtp_timeout',None)
+    smtp_timeout = parsed_str['main'].get('smtp_timeout', None)
 
     return (db_job_dict, file_job_dict, external_job_dict)
