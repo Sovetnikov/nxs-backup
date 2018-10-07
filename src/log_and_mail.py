@@ -25,10 +25,12 @@ def send_report(*message):
     success_subject_postfix = None
     if config.send_success_reports:
         success_jobs = config.all_executed_jobs - set(config.jobs_error_log.keys())
+        print('success_jobs={success_jobs}'.format(**locals()))
         if success_jobs:
             success_body = '\nSuccess run for jobs:\n' + '\n'.join('- ' + x for x in sorted(success_jobs))
             if not config.error_log:
                 success_subject_postfix = 'success'
+    print('success_body={success_body}'.format(**locals()))
 
     if config.level_message == 'debug':
         if config.error_log or success_body:
