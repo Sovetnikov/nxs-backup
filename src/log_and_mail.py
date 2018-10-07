@@ -69,7 +69,6 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body, subj
         msg['Subject'] = '%s notification dump.' % (server_name)
 
     if config.smtp_server:
-        msg = MIMEMultipart()
         msg['From'] = config.smtp_user if config.smtp_user and '@' in config.smtp_user else sender
         msg.attach(MIMEText(body))
         try:
@@ -88,7 +87,6 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body, subj
             writelog('ERROR', "Some problem when sending a message via %s: %s" % (config.smtp_server, e),
                      config.filelog_fd)
     else:
-        msg = MIMEText(body, "", "utf-8")
         msg['From'] = sender
         try:
             p = subprocess.Popen(["/usr/sbin/sendmail -t -oi"], stdin=subprocess.PIPE, shell=True)
