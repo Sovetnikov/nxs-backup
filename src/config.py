@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from collections import defaultdict
 
 import general_function
 
@@ -62,9 +63,11 @@ default_port_dict = {
 
 filelog_fd = ''
 error_log = ''
+jobs_error_log = defaultdict(list)
 debug_log = ''
 
 all_jobs_name = []
+all_executed_jobs = set()
 
 regular_str = ''  # The regular string that compares the argument to the program input (job's name).  
 general_str = ''  # String to display the available values for jobs names in help menu.
@@ -83,6 +86,7 @@ log_file = ''
 
 admin_mail = ''
 client_mail = []
+send_success_reports = None
 level_message = '' 
 mail_from = ''
 
@@ -122,6 +126,7 @@ def get_conf_value(parsed_str):
 
     global admin_mail
     global client_mail
+    global send_success_reports
     global level_message
     global mail_from
 
@@ -196,6 +201,7 @@ def get_conf_value(parsed_str):
 
     for i in parsed_str['main']['client_mail']:
         client_mail.append(i)
+    send_success_reports = parsed_str['main'].get('send_success_reports', None)
 
     level_message = parsed_str['main']['level_message']
     mail_from = parsed_str['main']['mail_from']
