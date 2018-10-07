@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from collections import defaultdict
 
 import general_function
 
@@ -26,12 +27,12 @@ supported_external_backup_type = [
 
 
 supported_storages = [
-                    'local', 
-                    'scp', 
-                    'ftp', 
-                    'webdav', 
-                    'smb', 
-                    'nfs', 
+                    'local',
+                    'scp',
+                    'ftp',
+                    'webdav',
+                    'smb',
+                    'nfs',
                     's3'
     ]
 
@@ -62,11 +63,13 @@ default_port_dict = {
 
 filelog_fd = ''
 error_log = ''
+jobs_error_log = defaultdict(list)
 debug_log = ''
 
 all_jobs_name = []
+all_executed_jobs = set()
 
-regular_str = ''  # The regular string that compares the argument to the program input (job's name).  
+regular_str = ''  # The regular string that compares the argument to the program input (job's name).
 general_str = ''  # String to display the available values for jobs names in help menu.
 
 regular_str_for_backup_type = ''
@@ -83,7 +86,8 @@ log_file = ''
 
 admin_mail = ''
 client_mail = []
-level_message = '' 
+send_success_reports = None
+level_message = ''
 mail_from = ''
 
 server_name = ''
@@ -122,6 +126,7 @@ def get_conf_value(parsed_str):
 
     global admin_mail
     global client_mail
+    global send_success_reports
     global level_message
     global mail_from
 
@@ -138,9 +143,9 @@ def get_conf_value(parsed_str):
     global smtp_server
     global smtp_port
     global smtp_ssl
+    global smtp_tls
     global smtp_user
     global smtp_password
-    global smtp_tls
     global smtp_timeout
 
     general_str_for_backup_type_db = ', '.join(supported_db_backup_type)
@@ -196,6 +201,7 @@ def get_conf_value(parsed_str):
 
     for i in parsed_str['main']['client_mail']:
         client_mail.append(i)
+    send_success_reports = parsed_str['main'].get('send_success_reports', None)
 
     level_message = parsed_str['main']['level_message']
     mail_from = parsed_str['main']['mail_from']
@@ -209,10 +215,10 @@ def get_conf_value(parsed_str):
 
     smtp_port = parsed_str['main'].get('smtp_port',None)
     smtp_ssl = parsed_str['main'].get('smtp_ssl',None)
+    smtp_tls = parsed_str['main'].get('smtp_tls',None)
     smtp_server = parsed_str['main'].get('smtp_server',None)
     smtp_user = parsed_str['main'].get('smtp_user',None)
     smtp_password = parsed_str['main'].get('smtp_password',None)
-    smtp_tls = parsed_str['main'].get('smtp_tls',None)
     smtp_timeout = parsed_str['main'].get('smtp_timeout', None)
 
     return (db_job_dict, file_job_dict, external_job_dict)

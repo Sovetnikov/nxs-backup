@@ -21,17 +21,26 @@ def send_report(*message):
         send_mail(config.mail_from, config.admin_mail, [], config.server_name, local_message)
         return 1
 
+    success_body = ''
+    success_subject_postfix = None
+    if config.send_success_reports:
+        success_jobs = config.all_executed_jobs - set(config.jobs_error_log.keys())
+        if success_jobs:
+            success_body = '\nSuccess run for jobs:\n' + '\n'.join('- ' + x for x in sorted(success_jobs))
+            if not config.error_log:
+                success_subject_postfix = 'success'
+
     if config.level_message == 'debug':
-        if config.error_log:
-            send_mail(config.mail_from, config.admin_mail, [], config.server_name, config.error_log)
+        if config.error_log or success_body:
+            send_mail(config.mail_from, config.admin_mail, [], config.server_name, config.error_log + success_body, subject_postfix=success_subject_postfix)
 
-        send_mail(config.mail_from, '', config.client_mail, config.server_name, config.debug_log)
+        send_mail(config.mail_from, '', config.client_mail, config.server_name, config.debug_log + success_body, subject_postfix=success_subject_postfix)
     else:
-        if config.error_log:
-            send_mail(config.mail_from, config.admin_mail, config.client_mail, config.server_name, config.error_log)
+        if config.error_log or success_body:
+            send_mail(config.mail_from, config.admin_mail, config.client_mail, config.server_name, config.error_log + success_body, subject_postfix=success_subject_postfix)
 
 
-def send_mail(sender, recipient_admin, recipient_client, server_name, body):
+def send_mail(sender, recipient_admin, recipient_client, server_name, body, subject_postfix=None):
     ''' The function sends a letter. The input receives the following arguments:
      sender - the sender's mailing address;
      recipient_admin - postal technical address of project administrators;
@@ -51,15 +60,22 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
 
     if config.smtp_server:
         msg = MIMEMultipart()
-        msg['From'] = config.smtp_user if config.smtp_user and '@' in config.smtp_user else sender
-        msg['To'] = ','.join(itog_mail_addr)
+    else:
+        msg = MIMEText(body, "", "utf-8")
+    msg['To'] = ','.join(itog_mail_addr)
+    if subject_postfix:
+        msg['Subject'] = '%s notification dump (%s).' % (server_name, subject_postfix)
+    else:
         msg['Subject'] = '%s notification dump.' % (server_name)
+
+    if config.smtp_server:
+        msg['From'] = config.smtp_user if config.smtp_user and '@' in config.smtp_user else sender
         msg.attach(MIMEText(body))
         try:
             if config.smtp_ssl:
                 smtp = smtplib.SMTP_SSL(config.smtp_server, port=config.smtp_port if config.smtp_port else 465, timeout=config.smtp_timeout)
             else:
-                smtp = smtplib.SMTP(config.smtp_server, port=config.smtp_port if config.smtp_port else 25, timeout=config.smtp_timeout)
+                smtp = smtplib.SMTP(config.smtp_server, port=config.smtp_port if config.smtp_port else 25)
             if config.smtp_tls:
                 smtp.starttls()
             if config.smtp_user and config.smtp_password:
@@ -68,18 +84,15 @@ def send_mail(sender, recipient_admin, recipient_client, server_name, body):
             smtp.sendmail(msg['From'], msg['To'], msg.as_string())
             smtp.close()
         except Exception as e:
-            writelog('ERROR', "Some problem when sending a message via %s: %s" %(config.smtp_server, e),
+            writelog('ERROR', "Some problem when sending a message via %s: %s" % (config.smtp_server, e),
                      config.filelog_fd)
     else:
-        msg = MIMEText(body, "", "utf-8")
-        msg['Subject'] = '%s notification dump.' % (server_name)
         msg['From'] = sender
-        msg['To'] = ','.join(itog_mail_addr)
         try:
             p = subprocess.Popen(["/usr/sbin/sendmail -t -oi"], stdin=subprocess.PIPE, shell=True)
             p.communicate(msg.as_bytes())
         except Exception as e:
-            writelog('ERROR', "Some problem when sending a message via /usr/bin/sendmail: %s" %e,
+            writelog('ERROR', "Some problem when sending a message via /usr/bin/sendmail: %s" % e,
                      config.filelog_fd)
 
 
@@ -95,9 +108,9 @@ def get_log(log_level, log_message, type_message=''):
     time_now = general_function.get_time_now('log')
 
     if type_message:
-        result_str = "%s [%s] [%s]: %s\n" %(log_level, type_message, time_now, log_message)
+        result_str = "%s [%s] [%s]: %s\n" % (log_level, type_message, time_now, log_message)
     else:
-        result_str = "%s [%s]: %s\n" %(log_level, time_now, log_message)
+        result_str = "%s [%s]: %s\n" % (log_level, time_now, log_message)
 
     return result_str
 
@@ -117,11 +130,13 @@ def writelog(log_level, log_message, fd, type_message=''):
         fd.write(log_str)
         fd.flush()
     except (OSError, PermissionError, FileNotFoundError) as err:
-        messange_info = "Couldn't write to log file:%s" %(err)
+        messange_info = "Couldn't write to log file:%s" % (err)
         general_function.print_info(messange_info)
 
     if log_level == 'ERROR':
         config.error_log += log_str
         config.debug_log += log_str
+        if type_message:
+            config.jobs_error_log[type_message].append(log_str)
     else:
         config.debug_log += log_str

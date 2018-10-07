@@ -165,6 +165,7 @@ def execute_job(jobs_name, jobs_data):
     '''
 
     log_and_mail.writelog('INFO', "Starting backup for job '%s'." % jobs_name, config.filelog_fd, jobs_name)
+    config.all_executed_jobs.add(jobs_name)
 
     if not specific_function.validation_storage_data(jobs_data):
         return 1
@@ -278,6 +279,7 @@ def main():
     finally:
         if config.filelog_fd:
             config.filelog_fd.close()
+
 
 if __name__ == '__main__':
     main()
