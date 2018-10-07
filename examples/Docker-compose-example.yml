@@ -10,3 +10,4 @@ services:
       - SYS_ADMIN
     security_opt:
       - apparmor:unconfined
+#docker run --rm --device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined nixyslab/nxs-backup
