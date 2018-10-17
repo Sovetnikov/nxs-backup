@@ -49,6 +49,7 @@ jobs:
       - CACHE
       gzip: yes
 
+    storages:
     - storage: s3
       enable: yes
 
