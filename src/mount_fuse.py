@@ -243,11 +243,12 @@ def mount(current_storage_data):
         mount_cmd = data_mount.get('mount_cmd')
         pre_install_cmd = data_mount.get('pre_install_cmd')
 
-        command = general_function.exec_cmd(update_cmd)
-        code = command['code']
+        if packets:
+            command = general_function.exec_cmd(update_cmd)
+            code = command['code']
 
-        if code != 0:
-            raise general_function.MyError("Bad result code external process '%s':'%s'" % (update_cmd, code))
+            if code != 0:
+                raise general_function.MyError("Bad result code external process '%s':'%s'" % (update_cmd, code))
 
         for i in packets:
             check_packet = general_function.exec_cmd("%s %s" % (check_cmd, i))
